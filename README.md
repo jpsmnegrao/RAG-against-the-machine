@@ -118,9 +118,18 @@ To additionally remove the virtual environment and generated output files:
 ### Project structure
 
 ```
+data/datasets/AnsweredQuestions
+├── dataset_code_public.json
+├── dataset_docs_public.json
+
+data/datasets/UnansweredQuestions
+├── dataset_code_public.json
+├── dataset_docs_public.json
+
 src/
 ├── __init__.py
 ├── __main__.py
+├── schemas.py
 
 ```
 
