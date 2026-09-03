@@ -1,0 +1,5 @@
+# Setup taken from call me maybe - to recheck
+
+[flake8]
+exclude = llm_sdk,.venv,.uv-cache,.hf-cache,.torch-cache,__pycache__,
+          .mypy_cache,.pytest_cache

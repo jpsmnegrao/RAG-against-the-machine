@@ -1,0 +1,9 @@
+# Setup taken from call me maybe - to recheck
+
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.uv-cache/
+.venv/
+.hf-cache/
+.torch-cache/

@@ -1,203 +1,155 @@
-# Moulinette
+*This project has been created as part of the 42 curriculum by jpaim-so.*
 
 
+A README.md file must be provided at the root of your Git repository. Its purpose is
+to allow anyone unfamiliar with the project (peers, staff, recruiters, etc.) to quickly
+understand what the project is about, how to run it, and where to find more information
+on the topic.
 
-Evaluation system for RAG submissions. Validates your search results and calculates recall metrics.
+The README.md must include at least:
+• The very first line must be italicized and read: This project has been created as part
+of the 42 curriculum by <login1>[, <login2>[, <login3>[...]]].
+• A “Description” section that clearly presents the project, including its goal and a
+brief overview.
+• An “Instructions” section containing any relevant information about compilation,
+installation, and/or execution.
+• A “Resources” section listing classic references related to the topic (documentation, articles, tutorials, etc.), as well as a description of how AI was used —
+specifying for which tasks and which parts of the project.
+
+➠ Additional sections may be required depending on the project (e.g., usage
+examples, feature list, technical choices, etc.).
+Any required additions will be explicitly listed below.
+For this project, the README.md must also include:
+• System architecture: Describe your RAG pipeline components and how they
+interact
+• Chunking strategy: Explain your approach to document segmentation
+• Retrieval method: Detail the retrieval algorithm and ranking mechanism
+21
+RAG against the machine Will you answer my questions?
+• Performance analysis: Discuss recall@k scores and system performance
+• Design decisions: Explain key implementation choices
+• Challenges faced: Document difficulties encountered and solutions
+• Example usage: Provide clear examples of running your system
 
 
-
-## Installation
-
+# RAG-against-the-machine
 
 
-```bash
+## Description
 
-uv venv && uv sync
+Mambo jambo.
 
-direnv allow  # or source .envrc
+
+## Instructions
+
+### Requirements
+
+- Python 3.10+;
+- `uv`;
+- The required `llm_sdk` package and model environment.
+
+#### NOTE
+
+Disk quota / cache configuration
+
+The project is configured in pyproject.toml to store the uv cache locally in
+.uv-cache. This is intentional because 42 machines have strict disk-quota
+limits on the home partition.
+
+The project can therefore be cloned to any location and installed with:
+
+`make install`
+
+No additional configuration is required on a personal computer.
+
+
+### Installation
+
+Install the project dependencies and set up the virtual environment with:
+
+`make`
+
+or:
+
+`make install`
+
+### Run
+
+`make run`
+
+### Debugging
+
+Run the application with Python's debugger using:
+
+`make debug`
+
+### Testing
+
+Run the complete pytest test suite with:
+
+`make test`
+
+### Linting and Type Checking
+
+Run the standard code-quality checks with:
+
+`make lint`
+
+Executes the commands flake8 . and mypy . --warn-return-any
+--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs
+--check-untyped-defs
+
+For stricter type checking:
+
+`make lint-strict`
+
+Which executes the commands flake8 . and mypy . --strict.
+
+### Cleaning
+
+Remove generated caches and Python bytecode with:
+
+`make clean`
+
+To additionally remove the virtual environment and generated output files:
+
+`make fclean`
+
+### Project structure
+
+```
+src/
+├── __init__.py
+├── __main__.py
 
 ```
 
+## Resources
 
-## CLI Commands
+### Documentation
 
+- [Pydantic documentation](https://docs.pydantic.dev/) — used throughout for
+  schema validation.
+- [Karpathy, "Deep Dive into LLMs like ChatGPT"](https://www.youtube.com/watch?v=7xTGNNLPyMI)
 
 
-### evaluate_student_search_results
+### AI Usage
 
+AI was used throughout development as a conversational aid for:
 
 
-Evaluate your search results against the ground truth dataset.
+## Additional sections:
 
+### System architecture
 
+### Chunking strategy
 
-```bash
+### Retrieval method
 
-uv run python -m moulinette evaluate_student_search_results \
+### Performance analysis
 
-    <student_results_path> \
+### Design decisions
 
-    <dataset_path> \
+### Challenges faced
 
-    [--k K] \
-
-    [--max_context_length MAX_LENGTH]
-
-```
-
-
-
-
-**Arguments:**
-
-| Argument | Type | Default | Description |
-
-|----------|------|---------|-------------|
-
-| `student_results_path` | str | required | Path to student search results JSON |
-
-| `dataset_path` | str | required | Path to ground truth dataset JSON |
-
-| `--k` | int | 10 | Maximum number of sources per question |
-
-| `--max_context_length` | int | 2000 | Maximum context length per source |
-
-
-
-**Example:**
-
-```bash
-
-uv run python -m moulinette evaluate_student_search_results \
-
-    ../data/output/search_results/dataset_code_public.json \
-
-    ../data/datasets/AnsweredQuestions/dataset_code_public.json \
-
-    --k 10 \
-
-    --max_context_length 2000
-
-```
-
-
-
-**Output:**
-
-- Validates student data format
-
-- Calculates Recall@1, Recall@3, Recall@5, Recall@10
-
-- Returns `True` if Recall@5 >= 50%, `False` otherwise
-
-
-
-
-### evaluate_student_answers
-
-
-
-Evaluate your generated answers (not yet implemented).
-
-
-
-```bash
-
-uv run python -m moulinette evaluate_student_answers <student_answer_path>
-
-```
-
-
-
-## Pass Criteria
-
-
-| Dataset | Metric | Threshold |
-
-|---------|--------|-----------|
-
-| Code | Recall@5 | >= 50% |
-
-| Docs | Recall@5 | >= 80% |
-
-
-
-## Input File Formats
-
-
-
-### Your Search Results (`student_results_path`)
-
-```json
-
-{
-
-  "search_results": [
-
-    {
-
-      "question_id": "uuid",
-
-      "question": "What is the question text?",
-
-      "retrieved_sources": [
-
-        {
-
-          "file_path": "data/raw/vllm-0.10.1/path/to/file",
-
-          "first_character_index": 0,
-
-          "last_character_index": 500
-
-        }
-
-      ]
-
-    }
-
-  ],
-
-  "k": 10
-
-}
-
-```
-
-
-
-### Ground Truth Dataset (`dataset_path`)
-
-```json
-
-{
-
-  "rag_questions": [
-
-    {
-
-      "question_id": "uuid",
-
-      "question": "What is...",
-
-      "answer": "The answer is...",
-
-      "sources": [
-
-        {
-
-          "file_path": "data/raw/vllm-0.10.1/path/to/file",
-
-          "first_character_index": 0,
-
-          "last_character_index": 500
-
-        }
-
-      ]
-
-    }
-
-  ]
-
-}
+### Example usage
