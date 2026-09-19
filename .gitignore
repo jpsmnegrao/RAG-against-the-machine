@@ -1,4 +1,6 @@
-# Setup taken from call me maybe - to recheck
+# Ignore caches, virtual environments, and all project data (raw corpus,
+# datasets, generated indexes/outputs, and source archives) — these are
+# either regenerated locally or provided separately, never committed.
 
 __pycache__/
 .mypy_cache/
@@ -7,3 +9,5 @@ __pycache__/
 .venv/
 .hf-cache/
 .torch-cache/
+data/
+*.zip
