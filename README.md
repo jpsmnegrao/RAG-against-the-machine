@@ -130,6 +130,7 @@ src/
 ├── __init__.py
 ├── __main__.py
 ├── schemas.py
+├── indexing.py
 
 ```
 
@@ -139,7 +140,7 @@ src/
 
 - [Pydantic documentation](https://docs.pydantic.dev/) — used throughout for
   schema validation.
-- [Karpathy, "Deep Dive into LLMs like ChatGPT"](https://www.youtube.com/watch?v=7xTGNNLPyMI)
+- [Retrieval-augmented generation](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)
 
 
 ### AI Usage

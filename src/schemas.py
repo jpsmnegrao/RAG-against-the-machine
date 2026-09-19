@@ -12,6 +12,11 @@ class MinimalSource(BaseModel):
     last_character_index: int
 
 
+class IndexedChunk(BaseModel):
+    minimalsource: MinimalSource
+    text: str
+
+
 class UnansweredQuestion(BaseModel):
     """mambo"""
     question_id: str = Field(default_factory=lambda: str(uuid.uuid4()))

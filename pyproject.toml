@@ -1,0 +1,19 @@
+# mambo jambo
+
+[project]
+name = "RAG-against-the-machine"
+version = "1.0.0"
+description = "Retrieval-Augmented system"
+requires-python = ">=3.10"
+authors = [{name = "jpaim-so"}]
+readme = "README.md"
+
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "flake8",
+]
