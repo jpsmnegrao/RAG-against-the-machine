@@ -16,4 +16,5 @@ dependencies = [
 dev = [
     "mypy",
     "flake8",
+    "langchain-text-splitters",
 ]
