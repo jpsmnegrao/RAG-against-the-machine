@@ -1,6 +1,7 @@
 """mambo jambo"""
 
 
+from pathlib import Path
 from langchain_text_splitters import Language
 
 from src.chunker import file_chunker, chunkinizer, extract_corpus_files
@@ -45,7 +46,7 @@ Nothing fancy, just prose.
 '''
 
 
-def test_python_chunker_respects_max_chunk_size(tmp_path) -> None:
+def test_python_chunker_respects_max_chunk_size(tmp_path: Path) -> None:
     file = tmp_path / "python_sample.py"
     file.write_text(SAMPLE_PYTHON)
     chunks: list[IndexedChunk] = file_chunker(file, 200, Language.PYTHON)
@@ -53,7 +54,7 @@ def test_python_chunker_respects_max_chunk_size(tmp_path) -> None:
         assert len(chunk.text) <= 200
 
 
-def test_python_chunker_offsets_match_text(tmp_path) -> None:
+def test_python_chunker_offsets_match_text(tmp_path: Path) -> None:
     file = tmp_path / "python_sample.py"
     file.write_text(SAMPLE_PYTHON)
     chunks: list[IndexedChunk] = file_chunker(file, 200, Language.PYTHON)
@@ -64,7 +65,7 @@ def test_python_chunker_offsets_match_text(tmp_path) -> None:
         assert raw_text[start:end] == chunk.text
 
 
-def test_markdown_chunker_respects_max_chunk_size(tmp_path) -> None:
+def test_markdown_chunker_respects_max_chunk_size(tmp_path: Path) -> None:
     file = tmp_path / "markdown_sample.md"
     file.write_text(SAMPLE_MARKDOWN)
     chunks: list[IndexedChunk] = file_chunker(file, 100, Language.MARKDOWN)
@@ -72,7 +73,7 @@ def test_markdown_chunker_respects_max_chunk_size(tmp_path) -> None:
         assert len(chunk.text) <= 100
 
 
-def test_markdown_chunker_offsets_match_text(tmp_path) -> None:
+def test_markdown_chunker_offsets_match_text(tmp_path: Path) -> None:
     file = tmp_path / "markdown_sample.md"
     file.write_text(SAMPLE_MARKDOWN)
     chunks: list[IndexedChunk] = file_chunker(file, 100, Language.MARKDOWN)
@@ -83,35 +84,35 @@ def test_markdown_chunker_offsets_match_text(tmp_path) -> None:
         assert raw_text[start:end] == chunk.text
 
 
-def test_chunkinizer_routes_python(tmp_path) -> None:
+def test_chunkinizer_routes_python(tmp_path: Path) -> None:
     file = tmp_path / "sample.py"
     file.write_text(SAMPLE_PYTHON)
     chunks = chunkinizer(file, 200)
     assert len(chunks) > 0
 
 
-def test_chunkinizer_routes_markdown(tmp_path) -> None:
+def test_chunkinizer_routes_markdown(tmp_path: Path) -> None:
     file = tmp_path / "sample.md"
     file.write_text(SAMPLE_MARKDOWN)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
 
 
-def test_chunkinizer_routes_txt(tmp_path) -> None:
+def test_chunkinizer_routes_txt(tmp_path: Path) -> None:
     file = tmp_path / "sample.txt"
     file.write_text(SAMPLE_TXT)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
 
 
-def test_chunkinizer_skips_unsupported_extension(tmp_path) -> None:
+def test_chunkinizer_skips_unsupported_extension(tmp_path: Path) -> None:
     file = tmp_path / "sample.json"
     file.write_text('{"key": "value"}')
     chunks = chunkinizer(file, 100)
     assert chunks == []
 
 
-def test_extract_corpus_files_finds_expected_files(tmp_path) -> None:
+def test_extract_corpus_files_finds_expected_files(tmp_path: Path) -> None:
     (tmp_path / "a.py").write_text(SAMPLE_PYTHON)
     (tmp_path / "b.md").write_text(SAMPLE_MARKDOWN)
     (tmp_path / "c.txt").write_text(SAMPLE_TXT)
@@ -127,7 +128,7 @@ def test_extract_corpus_files_finds_expected_files(tmp_path) -> None:
     assert found_names == {"a.py", "b.md", "c.txt", "e.py"}
 
 
-def test_chunker_handles_empty_file(tmp_path) -> None:
+def test_chunker_handles_empty_file(tmp_path: Path) -> None:
     file = tmp_path / "empty.py"
     file.write_text("")
     chunks = file_chunker(file, 200, Language.PYTHON)

@@ -2,4 +2,4 @@
 
 [flake8]
 exclude = llm_sdk,.venv,.uv-cache,.hf-cache,.torch-cache,__pycache__,
-          .mypy_cache,.pytest_cache
+          .mypy_cache,.pytest_cache,data/

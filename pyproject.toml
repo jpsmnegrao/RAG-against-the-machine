@@ -3,7 +3,7 @@
 [project]
 name = "RAG-against-the-machine"
 version = "1.0.0"
-description = "Retrieval-Augmented system"
+description = "Retrieval-Augmented Generation system"
 requires-python = ">=3.10"
 authors = [{name = "jpaim-so"}]
 readme = "README.md"
