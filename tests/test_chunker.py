@@ -1,4 +1,4 @@
-"""mambo jambo"""
+"""Tests for the file chunking and corpus file extraction functions."""
 
 
 from pathlib import Path
@@ -8,55 +8,21 @@ from src.chunker import file_chunker, chunkinizer, extract_corpus_files
 from src.schemas import IndexedChunk
 
 
-SAMPLE_PYTHON = '''\
-def add(a, b):
-    return a + b
-
-
-def subtract(a, b):
-    return a - b
-
-
-class Calculator:
-    def multiply(self, a, b):
-        return a * b
-
-    def divide(self, a, b):
-        return a / b
-'''
-
-SAMPLE_MARKDOWN = '''\
-# Title
-
-Some introductory paragraph explaining the topic.
-
-## Section One
-
-Content for section one goes here, with a bit more detail.
-
-## Section Two
-
-Content for section two, also with some detail to pad it out.
-'''
-
-SAMPLE_TXT = '''\
-This is a plain text file.
-It has a few lines of unstructured content.
-Nothing fancy, just prose.
-'''
-
-
-def test_python_chunker_respects_max_chunk_size(tmp_path: Path) -> None:
+def test_python_chunker_respects_max_chunk_size(
+        tmp_path: Path, sample_python: str) -> None:
+    """Verify Python chunks do not exceed the requested maximum size."""
     file = tmp_path / "python_sample.py"
-    file.write_text(SAMPLE_PYTHON)
+    file.write_text(sample_python)
     chunks: list[IndexedChunk] = file_chunker(file, 200, Language.PYTHON)
     for chunk in chunks:
         assert len(chunk.text) <= 200
 
 
-def test_python_chunker_offsets_match_text(tmp_path: Path) -> None:
+def test_python_chunker_offsets_match_text(
+        tmp_path: Path, sample_python: str) -> None:
+    """Verify Python chunk offsets identify the corresponding source text."""
     file = tmp_path / "python_sample.py"
-    file.write_text(SAMPLE_PYTHON)
+    file.write_text(sample_python)
     chunks: list[IndexedChunk] = file_chunker(file, 200, Language.PYTHON)
     raw_text = file.read_text()
     for chunk in chunks:
@@ -65,17 +31,21 @@ def test_python_chunker_offsets_match_text(tmp_path: Path) -> None:
         assert raw_text[start:end] == chunk.text
 
 
-def test_markdown_chunker_respects_max_chunk_size(tmp_path: Path) -> None:
+def test_markdown_chunker_respects_max_chunk_size(
+        tmp_path: Path, sample_markdown: str) -> None:
+    """Verify Markdown chunks do not exceed the requested maximum size."""
     file = tmp_path / "markdown_sample.md"
-    file.write_text(SAMPLE_MARKDOWN)
+    file.write_text(sample_markdown)
     chunks: list[IndexedChunk] = file_chunker(file, 100, Language.MARKDOWN)
     for chunk in chunks:
         assert len(chunk.text) <= 100
 
 
-def test_markdown_chunker_offsets_match_text(tmp_path: Path) -> None:
+def test_markdown_chunker_offsets_match_text(
+        tmp_path: Path, sample_markdown: str) -> None:
+    """Verify Markdown chunk offsets identify the corresponding source text."""
     file = tmp_path / "markdown_sample.md"
-    file.write_text(SAMPLE_MARKDOWN)
+    file.write_text(sample_markdown)
     chunks: list[IndexedChunk] = file_chunker(file, 100, Language.MARKDOWN)
     raw_text = file.read_text()
     for chunk in chunks:
@@ -84,51 +54,57 @@ def test_markdown_chunker_offsets_match_text(tmp_path: Path) -> None:
         assert raw_text[start:end] == chunk.text
 
 
-def test_chunkinizer_routes_python(tmp_path: Path) -> None:
+def test_chunkinizer_routes_python(tmp_path: Path, sample_python: str) -> None:
+    """Verify Python files are routed to the Python chunker."""
     file = tmp_path / "sample.py"
-    file.write_text(SAMPLE_PYTHON)
+    file.write_text(sample_python)
     chunks = chunkinizer(file, 200)
     assert len(chunks) > 0
 
 
-def test_chunkinizer_routes_markdown(tmp_path: Path) -> None:
+def test_chunkinizer_routes_markdown(
+        tmp_path: Path, sample_markdown: str) -> None:
+    """Verify Markdown files are routed to the Markdown chunker."""
     file = tmp_path / "sample.md"
-    file.write_text(SAMPLE_MARKDOWN)
+    file.write_text(sample_markdown)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
 
 
-def test_chunkinizer_routes_txt(tmp_path: Path) -> None:
+def test_chunkinizer_routes_txt(tmp_path: Path, sample_txt: str) -> None:
+    """Verify text files are routed to the generic text chunker."""
     file = tmp_path / "sample.txt"
-    file.write_text(SAMPLE_TXT)
+    file.write_text(sample_txt)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
 
 
 def test_chunkinizer_skips_unsupported_extension(tmp_path: Path) -> None:
+    """Verify files with unsupported extensions are ignored."""
     file = tmp_path / "sample.json"
     file.write_text('{"key": "value"}')
     chunks = chunkinizer(file, 100)
     assert chunks == []
 
 
-def test_extract_corpus_files_finds_expected_files(tmp_path: Path) -> None:
-    (tmp_path / "a.py").write_text(SAMPLE_PYTHON)
-    (tmp_path / "b.md").write_text(SAMPLE_MARKDOWN)
-    (tmp_path / "c.txt").write_text(SAMPLE_TXT)
+def test_extract_corpus_files_finds_expected_files(
+    tmp_path: Path, sample_python: str, sample_markdown: str, sample_txt: str,
+        ) -> None:
+    """Verify corpus extraction finds supported files recursively."""
+    (tmp_path / "a.py").write_text(sample_python)
+    (tmp_path / "b.md").write_text(sample_markdown)
+    (tmp_path / "c.txt").write_text(sample_txt)
     (tmp_path / "d.json").write_text('{"key": "value"}')
-
     subdir = tmp_path / "nested"
     subdir.mkdir()
-    (subdir / "e.py").write_text(SAMPLE_PYTHON)
-
+    (subdir / "e.py").write_text(sample_python)
     found = extract_corpus_files(tmp_path)
     found_names = {f.name for f in found}
-
     assert found_names == {"a.py", "b.md", "c.txt", "e.py"}
 
 
 def test_chunker_handles_empty_file(tmp_path: Path) -> None:
+    """Verify an empty file produces no chunks."""
     file = tmp_path / "empty.py"
     file.write_text("")
     chunks = file_chunker(file, 200, Language.PYTHON)
