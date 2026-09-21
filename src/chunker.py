@@ -1,4 +1,5 @@
-"""chunk_python/chunk_markdown/chunk_file"""
+"""Utilities for splitting Python, Markdown, and text files into indexed
+chunks."""
 
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
@@ -10,7 +11,18 @@ from src.schemas import IndexedChunk, MinimalSource
 def file_chunker(
         file: Path, max_chunk: int, language: Language | None
         ) -> list[IndexedChunk]:
-    """jambo"""
+    """Splits a file into indexed text chunks.
+
+    Args:
+        file: Path to the file to chunk.
+        max_chunk: Maximum number of characters per chunk.
+        language: Programming or markup language used for language-aware
+            splitting. If None, a generic text splitter is used.
+
+    Returns:
+        A list of IndexedChunk objects containing the chunk text and its source
+        file and character indices.
+    """
     chunks: list[IndexedChunk] = []
     raw_text: str = file.read_text()
     if language is not None:
@@ -43,7 +55,20 @@ def file_chunker(
 
 
 def chunkinizer(file_path: Path, max_chunk: int) -> list[IndexedChunk]:
-    """mambo"""
+    """Chunks Python, Markdown, and text files.
+
+    Files with the .py, .md, and .txt extensions are chunked using
+    language-specific splitting for Python and Markdown, and generic text
+    splitting for text files. Files with other extensions are ignored.
+
+    Args:
+        file_path: Path to the file to chunk.
+        max_chunk: Maximum number of characters per chunk.
+
+    Returns:
+        A list of IndexedChunk objects, or an empty list if the file format is
+        not supported.
+    """
     if file_path.suffix == ".py":
         language = Language.PYTHON
     elif file_path.suffix == ".md":
@@ -56,7 +81,15 @@ def chunkinizer(file_path: Path, max_chunk: int) -> list[IndexedChunk]:
 
 
 def extract_corpus_files(raw_data: Path) -> list[Path]:
-    """mambo"""
+    """Recursively finds supported corpus files in a directory.
+
+    Args:
+        raw_data: Root directory containing the corpus files.
+
+    Returns:
+        A list of paths to Python, Markdown, and text files found under the
+        given directory.
+    """
     corpus_files: list[Path] = []
     for f in raw_data.rglob("*"):
         if f.suffix in {".py", ".md", ".txt"}:

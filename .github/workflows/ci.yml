@@ -20,7 +20,8 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           version: latest
-
+          enable-cache: true
+          
       - name: Set up python
         run: uv python install 3.10
 
