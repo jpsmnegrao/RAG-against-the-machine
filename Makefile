@@ -34,5 +34,5 @@ fclean: clean
 
 	@echo "Removed virtual environment and output files - deep clean complete!"
 
-# test:
-# 	uv run pytest
+test:
+	uv run pytest

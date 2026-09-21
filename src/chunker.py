@@ -4,7 +4,7 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 from langchain_core.documents import Document
 from pathlib import Path
-from schemas import IndexedChunk, MinimalSource
+from src.schemas import IndexedChunk, MinimalSource
 
 
 def file_chunker(
