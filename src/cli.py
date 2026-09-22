@@ -1,7 +1,7 @@
 """mambo jambo"""
 
 
-import fire
+# import fire
 
 
 def index() -> None:
