@@ -54,29 +54,39 @@ def test_markdown_chunker_offsets_match_text(
         assert raw_text[start:end] == chunk.text
 
 
-def test_chunkinizer_routes_python(tmp_path: Path, sample_python: str) -> None:
-    """Verify Python files are routed to the Python chunker."""
+def test_python_file_path_is_correct(
+        tmp_path: Path, sample_python: str) -> None:
+    """Verify chunks produced from a Python file report the correct
+    file_path."""
     file = tmp_path / "sample.py"
     file.write_text(sample_python)
     chunks = chunkinizer(file, 200)
     assert len(chunks) > 0
+    for chunk in chunks:
+        assert chunk.minimalsource.file_path == str(file)
 
 
-def test_chunkinizer_routes_markdown(
+def test_markdown_file_path_is_correct(
         tmp_path: Path, sample_markdown: str) -> None:
-    """Verify Markdown files are routed to the Markdown chunker."""
+    """Verify chunks produced from a Markdown file report the correct
+    file_path."""
     file = tmp_path / "sample.md"
     file.write_text(sample_markdown)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
+    for chunk in chunks:
+        assert chunk.minimalsource.file_path == str(file)
 
 
-def test_chunkinizer_routes_txt(tmp_path: Path, sample_txt: str) -> None:
-    """Verify text files are routed to the generic text chunker."""
+def test_txt_file_path_is_correct(tmp_path: Path, sample_txt: str) -> None:
+    """Verify chunks produced from a text file report the correct
+    file_path."""
     file = tmp_path / "sample.txt"
     file.write_text(sample_txt)
     chunks = chunkinizer(file, 100)
     assert len(chunks) > 0
+    for chunk in chunks:
+        assert chunk.minimalsource.file_path == str(file)
 
 
 def test_chunkinizer_skips_unsupported_extension(tmp_path: Path) -> None:
