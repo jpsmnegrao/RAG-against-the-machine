@@ -1,0 +1,88 @@
+"""mambo jambo"""
+
+
+import pickle
+import bm25s
+import json
+from pathlib import Path
+from typing import Any
+
+from src.schemas import (MinimalSource, MinimalSearchResults,
+                         StudentSearchResults)
+from src.indexer import chunk_collector, bm25_scorer, index_exporter
+
+
+def load_search_artifacts(
+        artifacts_dir: str = "data/processed") -> tuple[Any, list[Any]]:
+    """jambo"""
+    artifacts_path = Path(artifacts_dir)
+    with open(artifacts_path / "index.pkl", "rb") as f:
+        index = pickle.load(f)
+    with open(artifacts_path / "corpus.pkl", "rb") as f:
+        corpus = pickle.load(f)
+    return index, corpus
+
+
+def index(max_chunk_size: int = 2000) -> None:
+    """jambo"""
+    corpus = chunk_collector(Path("data/raw"), max_chunk_size)
+    tokenized_index = bm25_scorer(corpus)
+    index_exporter(tokenized_index, corpus, Path("data/processed"))
+
+
+def search(query: str, k: int = 5) -> None:
+    """jambo"""
+    bm25_index, corpus = load_search_artifacts("data/processed/")
+    query_tokens = bm25s.tokenize([query])
+    results, scores = bm25_index.retrieve(query_tokens, k=k)
+    top_chunks = [corpus[i] for i in results[0]]
+    for chunk in top_chunks:
+        print(
+            chunk.minimalsource.file_path,
+            f"[{chunk.minimalsource.first_character_index}:"
+            f"{chunk.minimalsource.last_character_index}]")
+
+
+def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
+    """jambo"""
+    dataset_path = Path(dataset_path)
+    save_directory = Path(save_directory)
+    bm25_index, corpus = load_search_artifacts("data/processed/")
+    try:
+        with open(dataset_path, encoding="utf-8") as file:
+            data = json.load(file)
+            queries = data["rag_questions"]
+    except (
+            FileNotFoundError, json.JSONDecodeError, PermissionError, KeyError
+            ) as error:
+        print(f"Dataset load failed: {error}")
+        return
+    results_list = []
+    for query in queries:
+        query_tokens = bm25s.tokenize([query["question"]])
+        results, scores = bm25_index.retrieve(query_tokens, k=k)
+        top_chunks = [corpus[i] for i in results[0]]
+        retrieved_sources = []
+        for chunk in top_chunks:
+            ms = chunk.minimalsource
+            retrieved_sources.append(
+                MinimalSource(
+                    file_path=ms.file_path,
+                    first_character_index=ms.first_character_index,
+                    last_character_index=ms.last_character_index,
+                ))
+        results_list.append(
+            MinimalSearchResults(
+                question_id=query["question_id"],
+                question=query["question"],
+                retrieved_sources=retrieved_sources,
+            ))
+    student_search_results = (
+        StudentSearchResults(search_results=results_list, k=k))
+    save_directory.mkdir(parents=True, exist_ok=True)
+    output_file_path = save_directory / dataset_path.name
+    with open(
+            save_directory / dataset_path.name, "w",
+            encoding="utf-8") as file:
+        json.dump(student_search_results.model_dump(), file, indent=4)
+    print(f"Saved student_search_results to {output_file_path}")
