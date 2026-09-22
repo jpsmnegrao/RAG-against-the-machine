@@ -4,11 +4,11 @@
 import pickle
 import bm25s
 import json
+from tqdm import tqdm
 from pathlib import Path
 from typing import Any
 
-from src.schemas import (MinimalSource, MinimalSearchResults,
-                         StudentSearchResults)
+from src.schemas import MinimalSearchResults, StudentSearchResults
 from src.indexer import chunk_collector, bm25_scorer, index_exporter
 
 
@@ -58,19 +58,11 @@ def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
         print(f"Dataset load failed: {error}")
         return
     results_list = []
-    for query in queries:
+    for query in tqdm(queries, desc="Searching", unit=" question"):
         query_tokens = bm25s.tokenize([query["question"]])
         results, scores = bm25_index.retrieve(query_tokens, k=k)
         top_chunks = [corpus[i] for i in results[0]]
-        retrieved_sources = []
-        for chunk in top_chunks:
-            ms = chunk.minimalsource
-            retrieved_sources.append(
-                MinimalSource(
-                    file_path=ms.file_path,
-                    first_character_index=ms.first_character_index,
-                    last_character_index=ms.last_character_index,
-                ))
+        retrieved_sources = [chunk.minimalsource for chunk in top_chunks]
         results_list.append(
             MinimalSearchResults(
                 question_id=query["question_id"],
