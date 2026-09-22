@@ -10,6 +10,7 @@ readme = "README.md"
 
 dependencies = [
     "bm25s>=0.3.11",
+    "fire>=0.7.1",
     "pydantic>=2.0",
     "tdqm>=0.0.1",
 ]

@@ -33,6 +33,7 @@ def chunk_collector(raw_dir: Path, max_chunk_size: int) -> list[IndexedChunk]:
 def index_exporter(
         bm25: bm25s.BM25, chunks: list[IndexedChunk], path: Path) -> None:
     """mambo"""
+    path.mkdir(parents=True, exist_ok=True)
     with open(path / "index.pkl", "wb") as file:
         pickle.dump(bm25, file)
     with open(path / "corpus.pkl", "wb") as file:
