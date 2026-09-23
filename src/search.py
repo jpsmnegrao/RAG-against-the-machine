@@ -46,7 +46,9 @@ def search(query: str, k: int = 5) -> None:
 def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
     """jambo"""
     dataset_path = Path(dataset_path)
-    save_directory = Path(save_directory)
+    if isinstance(save_directory, bool):
+        raise ValueError("--save_directory requires a path argument.")
+    save_directory = Path(save_directory) / dataset_path.name
     bm25_index, corpus = load_search_artifacts("data/processed/")
     try:
         with open(dataset_path, encoding="utf-8") as file:
@@ -71,10 +73,8 @@ def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
             ))
     student_search_results = (
         StudentSearchResults(search_results=results_list, k=k))
-    save_directory.mkdir(parents=True, exist_ok=True)
-    output_file_path = save_directory / dataset_path.name
-    with open(
-            save_directory / dataset_path.name, "w",
-            encoding="utf-8") as file:
+    output_dir = save_directory.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    with open(save_directory, "w", encoding="utf-8") as file:
         json.dump(student_search_results.model_dump(), file, indent=4)
-    print(f"Saved student_search_results to {output_file_path}")
+    print(f"Saved student_search_results to {save_directory}")
