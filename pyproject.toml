@@ -9,10 +9,13 @@ authors = [{name = "jpaim-so"}]
 readme = "README.md"
 
 dependencies = [
+    "accelerate>=1.15.0",
     "bm25s>=0.3.11",
     "fire>=0.7.1",
     "pydantic>=2.0",
     "tdqm>=0.0.1",
+    "torch>=2.14.0",
+    "transformers>=5.17.0",
 ]
 
 [dependency-groups]
