@@ -17,3 +17,13 @@ Stage 8 — Generation (Qwen). Only now bring the LLM in: prompt construction fr
 Stage 9 — Robustness pass. Deliberately throw edge cases at your CLI (empty query, k=0, missing files, malformed JSON, nonsense queries) and make sure nothing throws an unhandled traceback.
 
 Stage 10 — README, Makefile polish, lint/mypy cleanup, final layout check. Do this last, once behavior is stable, so you're documenting/cleaning what actually exists rather than what you planned.
+
+
+git switch -c feature/my-feature
+
+git add .
+git commit -m ""
+git push -u origin branchname
+
+git switch main
+git pull

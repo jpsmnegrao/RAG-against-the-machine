@@ -12,6 +12,8 @@ from src.chunker import chunkinizer, extract_corpus_files
 
 def bm25_scorer(chunks: list[IndexedChunk]) -> bm25s.BM25:
     """mambo"""
+    if not chunks:
+        raise ValueError("Cannot build a BM25 index from an empty chunk list.")
     retriever = bm25s.BM25()
     texts = [chunk.text for chunk in chunks]
     with tqdm(total=len(texts), desc="Tokenizing", unit=" chunk") as bar:

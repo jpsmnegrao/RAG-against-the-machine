@@ -119,3 +119,35 @@ def test_chunker_handles_empty_file(tmp_path: Path) -> None:
     file.write_text("")
     chunks = file_chunker(file, 200, Language.PYTHON)
     assert chunks == []
+
+# def test_chunker_handles_invalid_encoding(tmp_path: Path) -> None:
+#     """mambo"""
+#     file = tmp_path / "bad_encoding.py"
+#     file.write_bytes(b"\xff\xfe\xfd")
+#     chunks = chunkinizer(file, 200)
+#     assert chunks == []
+
+
+# def test_chunker_handles_nonexistent_file(tmp_path: Path) -> None:
+#     """mambo"""
+#     file = tmp_path / "does_not_exist.py"
+#     chunks = chunkinizer(file, 200)
+#     assert chunks == []
+
+
+# def test_chunker_handles_invalid_max_chunk(
+#         tmp_path: Path, sample_python: str) -> None:
+#     """mambo"""
+#     file = tmp_path / "sample.py"
+#     file.write_text(sample_python)
+#     chunks_zero = chunkinizer(file, 0)
+#     chunks_negative = chunkinizer(file, -50)
+#     assert chunks_zero == []
+#     assert chunks_negative == []
+
+
+def test_extract_corpus_files_nonexistent_directory(tmp_path: Path) -> None:
+    """mambo"""
+    missing_dir = tmp_path / "nonexistent"
+    found = extract_corpus_files(missing_dir)
+    assert found == []

@@ -177,4 +177,6 @@ def answer_dataset(
     with open(save_directory, "w", encoding="utf-8") as file:
         json.dump(student_search_results_and_answer.model_dump(),
                   file, indent=4)
+    print(f"Loaded {len(queries)} questions ... Processed {len(answers_list)} "
+          f"of {len(queries)}")
     print(f"Saved student_search_results_and_answer to {save_directory}")

@@ -3,6 +3,7 @@ exporter."""
 
 import bm25s
 import pickle
+import pytest
 from pathlib import Path
 
 from src.schemas import IndexedChunk
@@ -93,3 +94,18 @@ def test_index_exporter_overwrites_existing_files(
         loaded_chunks: list[IndexedChunk] = pickle.load(file)
     assert isinstance(loaded_index, bm25s.BM25)
     assert loaded_chunks == chunks
+
+
+def test_bm25_scorer_empty_chunks() -> None:
+    """mambo"""
+    with pytest.raises(Exception):
+        bm25_scorer([])
+
+
+def test_index_exporter_invalid_path(tmp_path: Path) -> None:
+    """mambo"""
+    blocking_file = tmp_path / "not_a_directory"
+    blocking_file.write_text("blocking")
+    invalid_path = blocking_file / "subdir"
+    with pytest.raises((NotADirectoryError, FileNotFoundError, OSError)):
+        index_exporter(None, [], invalid_path)
