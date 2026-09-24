@@ -44,6 +44,13 @@ def test_chunk_collector_respects_max_chunk_size(
         assert len(chunk.text) <= 50
 
 
+def test_chunk_collector_nonexistent_directory() -> None:
+    """mambo"""
+    missing_dir = Path("/tmp/definitely_does_not_exist_12345")
+    chunks = chunk_collector(missing_dir, 2000)
+    assert chunks == []
+
+
 def test_bm25_scorer_creates_index(tmp_path: Path, sample_python: str) -> None:
     """Verify a BM25 index is created from multiple chunks."""
     file = tmp_path / "sample.py"
