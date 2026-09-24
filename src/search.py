@@ -16,10 +16,16 @@ def load_search_artifacts(
         artifacts_dir: str = "data/processed") -> tuple[Any, list[Any]]:
     """jambo"""
     artifacts_path = Path(artifacts_dir)
-    with open(artifacts_path / "index.pkl", "rb") as f:
-        index = pickle.load(f)
-    with open(artifacts_path / "corpus.pkl", "rb") as f:
-        corpus = pickle.load(f)
+    try:
+        with open(artifacts_path / "index.pkl", "rb") as f:
+            index = pickle.load(f)
+        with open(artifacts_path / "corpus.pkl", "rb") as f:
+            corpus = pickle.load(f)
+    except (
+            FileNotFoundError, json.JSONDecodeError, PermissionError, KeyError
+            ) as error:
+        print(f"Dataset load failed: {error}")
+        return None, []
     return index, corpus
 
 
