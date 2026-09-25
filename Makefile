@@ -4,6 +4,7 @@ export UV_CACHE_DIR := $(CURDIR)/.uv-cache
 export UV_PROJECT_ENVIRONMENT := $(CURDIR)/.venv
 export HF_HOME := $(CURDIR)/.hf-cache
 export TORCH_HOME := $(CURDIR)/.torch-cache
+export PYTORCH_CUDA_ALLOC_CONF := expandable_segments:True
 
 all: install
 
