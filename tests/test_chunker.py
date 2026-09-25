@@ -1,6 +1,7 @@
 """Tests for the file chunking and corpus file extraction functions."""
 
 
+import pytest
 from pathlib import Path
 from langchain_text_splitters import Language
 
@@ -8,7 +9,7 @@ from src.chunker import file_chunker, chunkinizer, extract_corpus_files
 from src.schemas import IndexedChunk
 
 
-def test_python_chunker_respects_max_chunk_size(
+def test_file_chunker_respects_max_chunk_size(
         tmp_path: Path, sample_python: str) -> None:
     """Verify Python chunks do not exceed the requested maximum size."""
     file = tmp_path / "python_sample.py"
@@ -18,7 +19,7 @@ def test_python_chunker_respects_max_chunk_size(
         assert len(chunk.text) <= 200
 
 
-def test_python_chunker_offsets_match_text(
+def test_file_chunker_offsets_match_text(
         tmp_path: Path, sample_python: str) -> None:
     """Verify Python chunk offsets identify the corresponding source text."""
     file = tmp_path / "python_sample.py"
@@ -31,7 +32,7 @@ def test_python_chunker_offsets_match_text(
         assert raw_text[start:end] == chunk.text
 
 
-def test_markdown_chunker_respects_max_chunk_size(
+def test_file_chunker_markdown_respects_max_chunk_size(
         tmp_path: Path, sample_markdown: str) -> None:
     """Verify Markdown chunks do not exceed the requested maximum size."""
     file = tmp_path / "markdown_sample.md"
@@ -54,7 +55,7 @@ def test_markdown_chunker_offsets_match_text(
         assert raw_text[start:end] == chunk.text
 
 
-def test_python_file_path_is_correct(
+def test_chunkinizer_python_file_path_is_correct(
         tmp_path: Path, sample_python: str) -> None:
     """Verify chunks produced from a Python file report the correct
     file_path."""
@@ -66,7 +67,7 @@ def test_python_file_path_is_correct(
         assert chunk.minimalsource.file_path == str(file)
 
 
-def test_markdown_file_path_is_correct(
+def test_chunkinizer_markdown_file_path_is_correct(
         tmp_path: Path, sample_markdown: str) -> None:
     """Verify chunks produced from a Markdown file report the correct
     file_path."""
@@ -78,9 +79,9 @@ def test_markdown_file_path_is_correct(
         assert chunk.minimalsource.file_path == str(file)
 
 
-def test_txt_file_path_is_correct(tmp_path: Path, sample_txt: str) -> None:
-    """Verify chunks produced from a text file report the correct
-    file_path."""
+def test_chunkinizer_txt_file_path_is_correct(
+        tmp_path: Path, sample_txt: str) -> None:
+    """Verify chunks produced from a text file report the correct file_path."""
     file = tmp_path / "sample.txt"
     file.write_text(sample_txt)
     chunks = chunkinizer(file, 100)
@@ -113,41 +114,80 @@ def test_extract_corpus_files_finds_expected_files(
     assert found_names == {"a.py", "b.md", "c.txt", "e.py"}
 
 
-def test_chunker_handles_empty_file(tmp_path: Path) -> None:
+def test_file_chunker_handles_empty_file(tmp_path: Path) -> None:
     """Verify an empty file produces no chunks."""
     file = tmp_path / "empty.py"
     file.write_text("")
     chunks = file_chunker(file, 200, Language.PYTHON)
     assert chunks == []
 
-# def test_chunker_handles_invalid_encoding(tmp_path: Path) -> None:
-#     """mambo"""
-#     file = tmp_path / "bad_encoding.py"
-#     file.write_bytes(b"\xff\xfe\xfd")
-#     chunks = chunkinizer(file, 200)
-#     assert chunks == []
+
+def test_chunkinizer_handles_invalid_encoding(tmp_path: Path) -> None:
+    """Verify chunkinizer handles files with invalid encoding gracefully."""
+    file = tmp_path / "bad_encoding.py"
+    file.write_bytes(b"\xff\xfe\xfd")
+    chunks = chunkinizer(file, 200)
+    assert chunks == []
 
 
-# def test_chunker_handles_nonexistent_file(tmp_path: Path) -> None:
-#     """mambo"""
-#     file = tmp_path / "does_not_exist.py"
-#     chunks = chunkinizer(file, 200)
-#     assert chunks == []
+def test_chunkinizer_handles_nonexistent_file(tmp_path: Path) -> None:
+    """Verify chunkinizer handles nonexistent files gracefully."""
+    file = tmp_path / "does_not_exist.py"
+    chunks = chunkinizer(file, 200)
+    assert chunks == []
 
 
-# def test_chunker_handles_invalid_max_chunk(
-#         tmp_path: Path, sample_python: str) -> None:
-#     """mambo"""
-#     file = tmp_path / "sample.py"
-#     file.write_text(sample_python)
-#     chunks_zero = chunkinizer(file, 0)
-#     chunks_negative = chunkinizer(file, -50)
-#     assert chunks_zero == []
-#     assert chunks_negative == []
+def test_chunkinizer_handles_invalid_max_chunk(
+        tmp_path: Path, sample_python: str) -> None:
+    """Verify chunkinizer raises ValueError for non-positive chunk sizes."""
+    file = tmp_path / "test.py"
+    file.write_text("print('hello')")
+    with pytest.raises(ValueError):
+        chunkinizer(file, max_chunk=0)
 
 
 def test_extract_corpus_files_nonexistent_directory(tmp_path: Path) -> None:
-    """mambo"""
+    """Verify corpus extraction handles nonexistent directories safely."""
     missing_dir = tmp_path / "nonexistent"
     found = extract_corpus_files(missing_dir)
     assert found == []
+
+
+def test_chunkinizer_unsupported_extension(tmp_path: Path) -> None:
+    """Verify chunker ignores unsupported file extensions."""
+    file = tmp_path / "image.png"
+    file.write_bytes(b"fake image data")
+    chunks = chunkinizer(file, 200)
+    assert chunks == []
+
+
+def test_chunkinizer_empty_file(tmp_path: Path) -> None:
+    """Verify chunker handles empty files correctly."""
+    file = tmp_path / "empty.txt"
+    file.write_text("")
+    chunks = chunkinizer(file, 200)
+    assert chunks == []
+
+
+def test_chunkinizer_is_a_directory(tmp_path: Path) -> None:
+    """Verify chunker handles directory paths gracefully."""
+    sub_dir = tmp_path / "subdir"
+    sub_dir.mkdir()
+    chunks = chunkinizer(sub_dir, 200)
+    assert chunks == []
+
+
+def test_extract_corpus_files(tmp_path: Path) -> None:
+    """Verify corpus extraction filters supported and unsupported files."""
+    (tmp_path / "script.py").write_text("print(1)")
+    (tmp_path / "notes.md").write_text("# Notes")
+    (tmp_path / "readme.txt").write_text("Hello")
+    (tmp_path / "data.json").write_text("{}")
+    sub = tmp_path / "nested"
+    sub.mkdir()
+    (sub / "sub_script.py").write_text("print(2)")
+    files = extract_corpus_files(tmp_path)
+    relative_files = {f.name for f in files}
+    assert relative_files == {"script.py", "notes.md", "readme.txt",
+                              "sub_script.py"}
+    assert "data.json" not in relative_files
