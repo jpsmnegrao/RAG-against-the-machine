@@ -24,7 +24,12 @@ def file_chunker(
         file and character indices.
     """
     chunks: list[IndexedChunk] = []
-    raw_text: str = file.read_text()
+    try:
+        raw_text: str = file.read_text()
+    except (UnicodeDecodeError, PermissionError, FileNotFoundError,
+            IsADirectoryError, OSError) as error:
+        print(f"Unable to load source file: {error}")
+        return []
     if language is not None:
         splitter = RecursiveCharacterTextSplitter.from_language(
             language=language,
@@ -68,7 +73,12 @@ def chunkinizer(file_path: Path, max_chunk: int) -> list[IndexedChunk]:
     Returns:
         A list of IndexedChunk objects, or an empty list if the file format is
         not supported.
+
+    Raises:
+        ValueError: If max_chunk is less than or equal to zero.
     """
+    if max_chunk <= 0:
+        raise ValueError("Max chunk size must be a positive number!")
     if file_path.suffix == ".py":
         language = Language.PYTHON
     elif file_path.suffix == ".md":
@@ -91,6 +101,8 @@ def extract_corpus_files(raw_data: Path) -> list[Path]:
         given directory.
     """
     corpus_files: list[Path] = []
+    if not raw_data.exists() or not raw_data.is_dir():
+        return corpus_files
     for f in raw_data.rglob("*"):
         if f.suffix in {".py", ".md", ".txt"}:
             corpus_files.append(f)
