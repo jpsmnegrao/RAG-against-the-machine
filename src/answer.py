@@ -3,7 +3,6 @@
 
 import json
 import bm25s
-import torch
 from tqdm import tqdm
 from pathlib import Path
 from typing import Any
@@ -17,7 +16,8 @@ def initialize_model() -> tuple[Any, Any]:
     """jambo"""
     model = (
         AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-0.6B",
-                                             device_map="auto"))
+                                             device_map="auto",
+                                             attn_implementation="sdpa",))
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
     return model, tokenizer
 
@@ -91,7 +91,7 @@ def answer(question: str, k: int) -> None:
         return_dict=True,
         add_generation_prompt=True
     ).to(model.device)
-    outputs = model.generate(**inputs, max_new_tokens=1024)
+    outputs = model.generate(**inputs, max_new_tokens=526)
     raw_answer_text = tokenizer.decode(
         outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
     answer_text = parse_model_output(raw_answer_text)
@@ -104,7 +104,6 @@ def answer_dataset(
     unanswered_questions_path = Path(student_search_results_path)
     save_directory = Path(save_directory) / unanswered_questions_path.name
     model, tokenizer = initialize_model()
-    model = torch.compile(model, dynamic=True)
     try:
         with open(student_search_results_path, encoding="utf-8") as file:
             data = json.load(file)
@@ -151,8 +150,8 @@ def answer_dataset(
                 return_dict=True,
                 add_generation_prompt=True,
                 enable_thinking=False
-            ).to(model.device)  # type: ignore[attr-defined]
-            outputs = model.generate(    # type: ignore[attr-defined]
+            ).to(model.device)
+            outputs = model.generate(
                 **inputs, max_new_tokens=256)
         except Exception as e:
             print(f"Error processing query: {e}")

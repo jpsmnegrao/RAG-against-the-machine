@@ -31,9 +31,12 @@ def load_search_artifacts(
 
 def index(max_chunk_size: int = 2000) -> None:
     """jambo"""
-    corpus = chunk_collector(Path("data/raw"), max_chunk_size)
-    tokenized_index = bm25_scorer(corpus)
-    index_exporter(tokenized_index, corpus, Path("data/processed"))
+    try:
+        corpus = chunk_collector(Path("data/raw"), max_chunk_size)
+        tokenized_index = bm25_scorer(corpus)
+        index_exporter(tokenized_index, corpus, Path("data/processed"))
+    except ValueError as error:
+        print(f"Could not index the data given: {error}")
 
 
 def search(query: str, k: int = 5) -> None:
