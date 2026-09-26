@@ -1,5 +1,8 @@
-"""Entry point for running the package as a module."""
+"""Command-line interface entry point for the RAG indexing and search pipeline.
 
+Powered by Python Fire to automatically expose module functions as CLI
+commands.
+"""
 
 import fire
 

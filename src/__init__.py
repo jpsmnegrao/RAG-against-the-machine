@@ -1,1 +1,1 @@
-"""jambo mambo"""
+"""Retrieval-Augmented Generation (RAG) indexing and search engine."""

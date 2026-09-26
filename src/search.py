@@ -1,5 +1,8 @@
-"""mambo jambo"""
+"""Retrieval-Augmented Generation (RAG) search and indexing interface module.
 
+Handles loading search artifacts, executing single-query and batch dataset
+searches, and triggering index generation workflows.
+"""
 
 import pickle
 import bm25s
@@ -14,34 +17,62 @@ from src.indexer import chunk_collector, bm25_scorer, index_exporter
 
 def load_search_artifacts(
         artifacts_dir: str = "data/processed") -> tuple[Any, list[Any]]:
-    """jambo"""
+    """Load the serialized BM25 index and corpus chunks from disk.
+
+    Args:
+        artifacts_dir: Directory path containing the saved index artifacts.
+
+    Returns:
+        A tuple containing the loaded BM25 index and corpus list.
+    """
     artifacts_path = Path(artifacts_dir)
-    try:
-        with open(artifacts_path / "index.pkl", "rb") as f:
-            index = pickle.load(f)
-        with open(artifacts_path / "corpus.pkl", "rb") as f:
-            corpus = pickle.load(f)
-    except (
-            FileNotFoundError, json.JSONDecodeError, PermissionError, KeyError
-            ) as error:
-        print(f"Dataset load failed: {error}")
-        return None, []
+    with open(artifacts_path / "index.pkl", "rb") as f:
+        index = pickle.load(f)
+    with open(artifacts_path / "corpus.pkl", "rb") as f:
+        corpus = pickle.load(f)
     return index, corpus
 
 
 def index(max_chunk_size: int = 2000) -> None:
-    """jambo"""
+    """Execute the corpus indexing pipeline with validation.
+
+    Args:
+        max_chunk_size: Maximum character count per generated text chunk.
+    """
+    if isinstance(max_chunk_size, bool):
+        print("Error: Using the flag with no value is a no go (reverts to True"
+              " = 1).")
+        return
+    if not isinstance(max_chunk_size, int):
+        print("Max_chunk_size value must be an int.")
+        return
+    elif max_chunk_size <= 0:
+        print("Error: --max_chunk_size requires a positive integer value.")
+        return
     try:
         corpus = chunk_collector(Path("data/raw"), max_chunk_size)
         tokenized_index = bm25_scorer(corpus)
         index_exporter(tokenized_index, corpus, Path("data/processed"))
-    except ValueError as error:
+    except (ValueError, FileNotFoundError) as error:
         print(f"Could not index the data given: {error}")
 
 
 def search(query: str, k: int = 5) -> None:
-    """jambo"""
-    bm25_index, corpus = load_search_artifacts("data/processed/")
+    """Perform a BM25 similarity search for a single query string.
+
+    Args:
+        query: Search query string.
+        k: Maximum number of top relevant chunks to retrieve.
+    """
+    if isinstance(k, bool) or k <= 0 or not isinstance(k, int):
+        print("Error: --k requires a positive integer value.")
+        return
+    try:
+        bm25_index, corpus = load_search_artifacts("data/processed/")
+    except (FileNotFoundError, pickle.UnpicklingError) as error:
+        print(f"Could not load index: {error}")
+        return
+    k = min(k, len(corpus))
     query_tokens = bm25s.tokenize([query])
     results, scores = bm25_index.retrieve(query_tokens, k=k)
     top_chunks = [corpus[i] for i in results[0]]
@@ -53,12 +84,26 @@ def search(query: str, k: int = 5) -> None:
 
 
 def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
-    """jambo"""
+    """Execute search queries over an entire evaluation dataset.
+
+    Args:
+        dataset_path: Path to the JSON dataset file containing questions.
+        k: Maximum number of results to retrieve per query.
+        save_directory: Directory path where search outputs will be saved.
+    """
     dataset_path = Path(dataset_path)
     if isinstance(save_directory, bool):
         raise ValueError("--save_directory requires a path argument.")
     save_directory = Path(save_directory) / dataset_path.name
-    bm25_index, corpus = load_search_artifacts("data/processed/")
+    if not dataset_path.exists() or not dataset_path.is_file():
+        print("Dataset load failed: [Errno 2] No such file or directory: "
+              f"'{dataset_path}'")
+        return
+    try:
+        bm25_index, corpus = load_search_artifacts("data/processed/")
+    except (FileNotFoundError, pickle.UnpicklingError) as error:
+        print(f"Dataset load failed: {error}")
+        return
     try:
         with open(dataset_path, encoding="utf-8") as file:
             data = json.load(file)
