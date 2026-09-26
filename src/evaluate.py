@@ -1,4 +1,8 @@
-"""mambo jambo"""
+"""Retrieval-Augmented Generation (RAG) evaluation module.
+
+Computes metrics such as Intersection over Union (IoU) and Recall@K to evaluate
+retrieved search results against ground truth benchmark datasets.
+"""
 
 
 import json
@@ -10,7 +14,15 @@ from src.schemas import StudentSearchResults, RagDataset
 
 
 def IoU_calculation(s1: dict[str, Any], s2: dict[str, Any]) -> float:
-    """jambo"""
+    """Calculate the Intersection over Union (IoU) of two text character spans.
+
+    Args:
+        s1: First source dictionary with character indices.
+        s2: Second source dictionary with character indices.
+
+    Returns:
+        The IoU ratio as a float between 0.0 and 1.0.
+    """
     start1, end1 = s1["first_character_index"], s1["last_character_index"]
     start2, end2 = s2["first_character_index"], s2["last_character_index"]
     intersection = max(0, min(end1, end2) - max(start1, start2))
@@ -24,7 +36,16 @@ def question_recall(
         ground_truth_srcs: list[dict[str, Any]],
         retrieved: list[dict[str, Any]],
         k: int) -> float:
-    """mambo"""
+    """Calculate recall for a single question based on top-k retrieved sources.
+
+    Args:
+        ground_truth_srcs: List of ground truth source annotations.
+        retrieved: List of retrieved source chunks.
+        k: Number of top results to evaluate.
+
+    Returns:
+        The recall score as a float ratio.
+    """
     if not ground_truth_srcs:
         return 0.0
     top_k = retrieved[:k]
@@ -39,7 +60,14 @@ def question_recall(
 
 
 def evaluate(student_search_results_path: Path, dataset_path: Path) -> None:
-    """mambo"""
+    """Evaluate student search predictions against a benchmark dataset.
+
+    Args:
+        student_search_results_path: Path to JSON file containing student
+            search results.
+        dataset_path: Path to JSON file containing ground truth RAG benchmark
+            data.
+    """
     try:
         with open(student_search_results_path, "r", encoding="utf-8") as file:
             raw_search_data = json.load(file)
