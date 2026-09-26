@@ -95,10 +95,14 @@ def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
     if isinstance(save_directory, bool):
         raise ValueError("--save_directory requires a path argument.")
     save_directory = Path(save_directory) / dataset_path.name
+    if not dataset_path.exists() or not dataset_path.is_file():
+        print("Dataset load failed: [Errno 2] No such file or directory: "
+              f"'{dataset_path}'")
+        return
     try:
         bm25_index, corpus = load_search_artifacts("data/processed/")
     except (FileNotFoundError, pickle.UnpicklingError) as error:
-        print(f"Could not load index: {error}")
+        print(f"Dataset load failed: {error}")
         return
     try:
         with open(dataset_path, encoding="utf-8") as file:
