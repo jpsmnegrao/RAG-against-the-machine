@@ -64,8 +64,11 @@ def search(query: str, k: int = 5) -> None:
         query: Search query string.
         k: Maximum number of top relevant chunks to retrieve.
     """
-    if isinstance(k, bool) or k <= 0 or not isinstance(k, int):
+    if isinstance(k, bool) or not isinstance(k, int) or k <= 0:
         print("Error: --k requires a positive integer value.")
+        return
+    if not query.strip():
+        print("Error: query must not be empty.")
         return
     try:
         bm25_index, corpus = load_search_artifacts("data/processed/")
@@ -91,9 +94,16 @@ def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
         k: Maximum number of results to retrieve per query.
         save_directory: Directory path where search outputs will be saved.
     """
-    dataset_path = Path(dataset_path)
+    if isinstance(dataset_path, bool):
+        print("Error: --dataset_path requires a path argument.")
+        return
     if isinstance(save_directory, bool):
-        raise ValueError("--save_directory requires a path argument.")
+        print("Error: --save_directory requires a path argument.")
+        return
+    if isinstance(k, bool) or not isinstance(k, int) or k <= 0:
+        print("Error: --k requires a positive integer value.")
+        return
+    dataset_path = Path(dataset_path)
     save_directory = Path(save_directory) / dataset_path.name
     if not dataset_path.exists() or not dataset_path.is_file():
         print("Dataset load failed: [Errno 2] No such file or directory: "
@@ -115,10 +125,13 @@ def search_dataset(dataset_path: Path, k: int, save_directory: Path) -> None:
         return
     results_list = []
     for query in tqdm(queries, desc="Searching", unit=" question"):
-        query_tokens = bm25s.tokenize([query["question"]])
-        results, scores = bm25_index.retrieve(query_tokens, k=k)
-        top_chunks = [corpus[i] for i in results[0]]
-        retrieved_sources = [chunk.minimalsource for chunk in top_chunks]
+        if not query["question"].strip():
+            retrieved_sources = []
+        else:
+            query_tokens = bm25s.tokenize([query["question"]])
+            results, scores = bm25_index.retrieve(query_tokens, k=k)
+            top_chunks = [corpus[i] for i in results[0]]
+            retrieved_sources = [chunk.minimalsource for chunk in top_chunks]
         results_list.append(
             MinimalSearchResults(
                 question_id=query["question_id"],

@@ -1,4 +1,6 @@
-# Setup taken from call me maybe - to recheck
+# Tells flake8 to skip the virtual environment and Python cache folders
+# when running `flake8 .`. Without this, flake8 would lint every file
+# inside venv/ and crash on style issues in third-party packages.
 
 [flake8]
 exclude = llm_sdk,.venv,.uv-cache,.hf-cache,.torch-cache,__pycache__,

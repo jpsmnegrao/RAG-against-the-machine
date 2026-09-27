@@ -61,7 +61,7 @@ data/
     ├── search_results/
     │   └── UnansweredQuestions/
     │       ├── dataset_code_public.json     # Generated: retrieval results for code questions
-    │       └── dataset_docs_public.json     # Generated: retrieval results for docsquestions
+    │       └── dataset_docs_public.json     # Generated: retrieval results for docs questions
     └── search_results_and_answer/
         └── UnansweredQuestions/
             ├── dataset_code_public.json     # Generated: retrieval results and answers for code questions
@@ -80,14 +80,15 @@ data/
 
 ### Instalation
 
-Important: When on the school PCs (or toher lower spec machines) the project
+Important: When on the school PCs (or other lower spec machines) the project
 must be installed using the provided Makefile commands rather than running uv
 directly.
 
 The Makefile sets project-specific environment variables for UV, Hugging Face,
 and PyTorch caches. Running uv commands directly does not load these variables
 and causes caches to be stored in the user's home directory. On the school's
-computers, this consistently leads to storage issues during installation.
+computers, this consistently leads to storage issues during installation and/or
+execution.
 
 To install run:
 

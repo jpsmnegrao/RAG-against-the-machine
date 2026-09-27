@@ -68,6 +68,12 @@ def evaluate(student_search_results_path: Path, dataset_path: Path) -> None:
         dataset_path: Path to JSON file containing ground truth RAG benchmark
             data.
     """
+    if isinstance(student_search_results_path, bool):
+        print("Error: --student_search_results_path requires a path argument.")
+        return
+    if isinstance(dataset_path, bool):
+        print("Error: --dataset_path requires a path argument.")
+        return
     try:
         with open(student_search_results_path, "r", encoding="utf-8") as file:
             raw_search_data = json.load(file)
