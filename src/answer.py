@@ -48,6 +48,11 @@ def retrieve_sources(question: str, k: int) -> list[dict[str, str]]:
         print(f"Could not load index: {error}")
         return []
     query_tokens = bm25s.tokenize([question])
+    try:
+        bm25_index, corpus = load_search_artifacts("data/processed/")
+    except (FileNotFoundError, pickle.UnpicklingError) as error:
+        print(f"Could not load index: {error}")
+        return []
     results, _ = bm25_index.retrieve(query_tokens, k=k)
     if results is None or len(results) == 0 or len(results[0]) == 0:
         print("[Retrieval Info]: No matching documents found in index.")
