@@ -44,8 +44,8 @@ def retrieve_sources(question: str, k: int) -> list[dict[str, str]]:
     """
     try:
         bm25_index, corpus = load_search_artifacts("data/processed/")
-    except (FileNotFoundError, json.JSONDecodeError) as error:
-        print(f"Index load failed: {error}")
+    except (FileNotFoundError, pickle.UnpicklingError) as error:
+        print(f"Could not load index: {error}")
         return []
     query_tokens = bm25s.tokenize([question])
     try:
@@ -104,6 +104,12 @@ def answer(question: str, k: int) -> None:
         question: The user question to answer.
         k: Number of chunks to retrieve for context.
     """
+    if isinstance(k, bool) or not isinstance(k, int) or k <= 0:
+        print("Error: --k requires a positive integer value.")
+        return
+    if not question.strip():
+        print("Error: query must not be empty.")
+        return
     sources = retrieve_sources(question, k)
     if not sources:
         print("\nAnswer:\nThe provided context does not contain this "
@@ -142,6 +148,12 @@ def answer_dataset(
             and retrieved sources.
         save_directory: Directory path where generated answers will be saved.
     """
+    if isinstance(student_search_results_path, bool):
+        print("Error: --student_search_results_path requires a path argument.")
+        return
+    if isinstance(save_directory, bool):
+        print("Error: --save_directory requires a path argument.")
+        return
     unanswered_questions_path = Path(student_search_results_path)
     save_directory = Path(save_directory) / unanswered_questions_path.name
     model, tokenizer = initialize_model()
@@ -159,6 +171,15 @@ def answer_dataset(
         question_id = item["question_id"]
         question = item["question"]
         retrieved_sources = item["retrieved_sources"]
+        if not question.strip():
+            answers_list.append(
+                MinimalAnswer(
+                    question_id=question_id,
+                    question=question,
+                    retrieved_sources=retrieved_sources,
+                    answer="No question was provided."
+                ))
+            continue
         context_blocks = []
         for source in retrieved_sources:
             file_path = source["file_path"]

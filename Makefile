@@ -16,7 +16,7 @@ run:
 	uv run -m src
 
 debug:
-	uv run python -m pdb -m src
+	uv run -m pdb -m src
 
 clean:
 	@rm -rf .mypy_cache .pytest_cache/ ; \
