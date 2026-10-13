@@ -11,3 +11,6 @@ __pycache__/
 .torch-cache/
 data/
 *.zip
+'Intra Projects RAG against the machine Edit.pdf'
+RAG-against-the-machine.pdf
+README_moulinette.md notes.md
