@@ -120,12 +120,17 @@ make clean        # removes __pycache__, .mypy_cache, .pytest_cache
 ### Extra rules
 
 ```
-make query    # runs a sample search query with k=10
-make answer   # runs a sample answer query with k=10
-make evaluate # evaluates the sample search results against the dataset
-make fclean   # clean + removes the virtual environment and generated output
-                files
-make test     # runs the pytest test suite
+make query    				    # runs a sample search query with k=10
+make answer   				    # runs a sample answer query with k=10
+make evaluate 				    # evaluates the sample search results against
+                                  the dataset
+make fclean   				    # clean + removes the virtual environment and
+							 	  generated output files
+make test     				    # runs the pytest test suite
+make pipeline-run               # indexes the corpus, searches the docs dataset
+							 	  and evaluates retrieval
+make pipeline-run-with-answers  # runs the full pipeline, including LLM answer
+							 	  generation
 ```
 
 
