@@ -68,6 +68,19 @@ data/
             └── dataset_docs_public.json     # Generated: retrieval results and answers for docs questions
 ```
 
+### Tests
+
+The project uses pytest to test its core functionality, including:
+- Chunking: chunk size limits, text offsets, supported file types, and invalid inputs.
+- Indexing: BM25 index creation, corpus collection, and index export.
+- Search: query handling, retrieval edge cases, and missing indexes.
+- Answer generation: dataset processing, missing source files, and generation
+  failures.
+- Evaluation: input validation, malformed datasets, and Intersection over Union
+  (IoU) calculations.
+
+Tests cover normal operation, edge cases, and error handling to help ensure the pipeline behaves reliably when inputs or required files are invalid or missing.
+
 
 ## Instructions
 
